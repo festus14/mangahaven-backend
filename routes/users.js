@@ -20,7 +20,7 @@ router.get("/", (req, res, next) => {
   res.send("respond with a resource");
 });
 
-// @route   POST /users/register
+// @route   POST /api/users/register
 // @desc    Register User
 // @access  Public
 router.post("/register", (req, res) => {
@@ -61,9 +61,9 @@ router.post("/register", (req, res) => {
   });
 });
 
-// @route   POST /users/login
+// @route   POST /api/users/login
 // @desc    Login User / Return JWT Token
-// @access  Private
+// @access  Public
 router.post("/login", (req, res) => {
   const { errors, isValid } = validateLoginInput(req.body);
 
@@ -107,9 +107,9 @@ router.post("/login", (req, res) => {
   });
 });
 
-// @route   GET /users/current
+// @route   GET /api/users/current
 // @desc    Get current user
-// @access  Public
+// @access  Private
 router.get(
   "/current",
   passport.authenticate("jwt", { session: false }),
