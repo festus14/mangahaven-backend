@@ -3,7 +3,6 @@ const express = require("express");
 const path = require("path");
 const serverless = require("serverless-http");
 const app = express();
-const bodyParser = require("body-parser");
 const createError = require("http-errors");
 const mongoose = require("mongoose");
 const passport = require("passport");
