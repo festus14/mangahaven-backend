@@ -40,25 +40,22 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Use routes
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
+// app.use("/", indexRouter);
+// app.use("/users", usersRouter);
 
 router.get("/", (req, res) => {
   res.writeHead(200, { "Content-Type": "text/html" });
-  res.write(
-    "<h1>Hello, this is the mangahaven backend please attach '/.netlify/functions/server' to the end of this route</h1>"
-  );
+  res.write("<h1>Hello to my first backend deploy</h1>");
   res.end();
 });
 router.get("/another", (req, res) =>
-  res.json({ route: req.originalUrl, info: "another/route" })
+  res.json({ route: req.originalUrl, another: "data" })
 );
-router.post("/", (req, res) =>
-  res.json({ msg: "Success", postBody: req.body })
-);
+router.post("/", (req, res) => res.json({ postBody: req.body }));
 
-// Configure netlify route
+app.use(bodyParser.json());
 app.use("/.netlify/functions/server", router); // path must route to lambda
+app.use("/", (req, res) => res.sendFile(path.join(__dirname, "../index.html")));
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
