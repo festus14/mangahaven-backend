@@ -46,8 +46,6 @@ buck-out/
 !debug.keystore
 
 # production
-/build
-/functions-build
 functions
 .cache
 
