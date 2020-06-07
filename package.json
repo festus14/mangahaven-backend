@@ -4,7 +4,7 @@
   "private": true,
   "main": "functions/app.js",
   "scripts": {
-    "build": "netlify-lambda build express",
+    "build": "netlify-lambda build server-local.js",
     "start": "nodemon server-local.js"
   },
   "dependencies": {
