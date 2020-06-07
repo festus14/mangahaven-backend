@@ -6,7 +6,6 @@ const path = require("path");
 const serverless = require("serverless-http");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-const router = express.Router();
 
 // Importing Routes
 const indexRouter = require("../routes/index");
@@ -58,7 +57,7 @@ router.post("/", (req, res) =>
 );
 
 // Configure netlify route
-app.use("/.netlify/functions/server", router); // path must route to lambda
+app.use("/.netlify/functions/server", indexRouter); // path must route to lambda
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
