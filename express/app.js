@@ -6,6 +6,7 @@ const path = require("path");
 const serverless = require("serverless-http");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+var router = express.Router();
 
 // Importing Routes
 const indexRouter = require("../routes/index");
