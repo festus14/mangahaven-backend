@@ -55,7 +55,7 @@ app.use((err, req, res, next) => {
 
   // render the error page
   res.status(err.status || 500);
-  res.send("Page Not Found");
+  res.json({ err: "Page Not Found" });
 });
 
 app.use("/", (req, res) => res.sendFile(path.join(__dirname, "../index.html")));
