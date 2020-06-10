@@ -31,9 +31,6 @@ mongoose
 // Passport Middleware
 app.use(passport.initialize());
 
-// CORS Middleware
-app.use(cors());
-
 // Passport Config
 require("../config/passport")(passport);
 
@@ -43,6 +40,9 @@ app.use(bodyParser.json());
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// CORS Middleware
+app.use(cors());
 
 // Use routes
 app.use("/", indexRouter);
