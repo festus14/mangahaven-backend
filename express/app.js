@@ -38,6 +38,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Use routes
+app.use("/", indexRouter);
 app.use("/.netlify/functions/app/", indexRouter);
 app.use("/.netlify/functions/app/users", usersRouter);
 
