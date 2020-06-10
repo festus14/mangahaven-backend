@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const serverless = require("serverless-http");
 const app = express();
+const cors = require("cors");
 const createError = require("http-errors");
 const mongoose = require("mongoose");
 const passport = require("passport");
@@ -28,6 +29,9 @@ mongoose
 
 // Passport Middleware
 app.use(passport.initialize());
+
+// CORS Middleware
+app.use(cors());
 
 // Passport Config
 require("../config/passport")(passport);
