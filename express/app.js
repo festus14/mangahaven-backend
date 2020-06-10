@@ -7,6 +7,7 @@ const cors = require("cors");
 const createError = require("http-errors");
 const mongoose = require("mongoose");
 const passport = require("passport");
+const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 
@@ -37,8 +38,10 @@ app.use(cors());
 require("../config/passport")(passport);
 
 app.use(logger("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// parse application/json
+app.use(bodyParser.json());
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Use routes
