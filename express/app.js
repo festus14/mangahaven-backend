@@ -14,6 +14,7 @@ const logger = require("morgan");
 // Importing Routes
 const indexRouter = require("../routes/index");
 const usersRouter = require("../routes/users");
+const profileRouter = require("../routes/profile");
 
 // Import mongoose Key
 const uri = require("../config/keys").mongoURI;
@@ -48,6 +49,7 @@ app.use(cors());
 app.use("/", indexRouter);
 app.use("/.netlify/functions/app/", indexRouter);
 app.use("/.netlify/functions/app/users", usersRouter);
+app.use("/.netlify/functions/app/profile", profileRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

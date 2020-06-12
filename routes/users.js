@@ -31,31 +31,36 @@ router.post("/register", (req, res) => {
 
   const { email, name, password } = req.body;
   User.findOne({ email: email }).then((user) => {
-    errors.email = "email already exist";
-    if (user) return res.status(400).json(errors);
+    if (user) {
+      errors.email = "email already exist";
+      return res.status(400).json(errors);
+    }
+    User.findOne({ name: name }).then((user) => {
+      errors.name = "username already exist";
+      if (user) return res.status(400).json(errors);
+      const avatar = gravatar.url(email, {
+        s: "200",
+        r: "pg",
+        d: "mm",
+      });
 
-    const avatar = gravatar.url(email, {
-      s: "200",
-      r: "pg",
-      d: "mm",
-    });
+      const newUser = new User({
+        name,
+        email,
+        avatar,
+        password,
+      });
 
-    const newUser = new User({
-      name,
-      email,
-      avatar,
-      password,
-    });
-
-    bcrypt.genSalt(10, (err, salt) => {
-      if (err) throw err;
-      bcrypt.hash(password, salt, (err, hash) => {
+      bcrypt.genSalt(10, (err, salt) => {
         if (err) throw err;
-        newUser.password = hash;
-        newUser
-          .save()
-          .then((user) => res.json(user))
-          .catch((err) => res.json(err));
+        bcrypt.hash(password, salt, (err, hash) => {
+          if (err) throw err;
+          newUser.password = hash;
+          newUser
+            .save()
+            .then((user) => res.json(user))
+            .catch((err) => res.json(err));
+        });
       });
     });
   });
