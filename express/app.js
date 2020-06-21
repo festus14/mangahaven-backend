@@ -15,6 +15,8 @@ const logger = require("morgan");
 const indexRouter = require("../routes/index");
 const usersRouter = require("../routes/users");
 const profileRouter = require("../routes/profile");
+const favoriteRouter = require("../routes/favorite");
+const bookmarkRouter = require("../routes/bookmark");
 
 // Import mongoose Key
 const uri = require("../config/keys").mongoURI;
@@ -50,6 +52,8 @@ app.use("/", indexRouter);
 app.use("/.netlify/functions/app/", indexRouter);
 app.use("/.netlify/functions/app/users", usersRouter);
 app.use("/.netlify/functions/app/profile", profileRouter);
+app.use("/.netlify/functions/app/favorite", favoriteRouter);
+app.use("/.netlify/functions/app/bookmark", bookmarkRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
