@@ -7,6 +7,10 @@ const FavoriteSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
+  manga_id: {
+    type: String,
+    required: true,
+  },
   alias: {
     type: String,
     required: true,

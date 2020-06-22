@@ -52,45 +52,62 @@ router.post(
 
     const { manga_id, alias, image_uri, title, time_ms, _id } = req.body;
 
-    Bookmark.findById(_id).then((bookmark) => {
-      if (bookmark) {
-        User.findById(req.user.id).then((user) => {
-          // Check favorite owner
-          if (user._id.toString() === bookmark.user.toString()) {
-            Bookmark.findByIdAndDelete(req.body._id)
-              .then((bookmark) =>
-                res.json({
-                  success: "Successfully removed from bookmarks",
-                  bookmark,
-                })
-              )
-              .catch((err) =>
-                res.status(400).json({
-                  err,
-                })
-              );
-          } else {
-            return res.status(401).json({
-              unauthorized: "You are unauthorized to delete this bookmark",
-            });
-          }
-        });
-      }
-
-      new Bookmark({
-        user: req.user.id,
-        manga_id,
-        alias,
-        image_uri,
-        title,
-        time_ms,
-      })
-        .save()
-        .then((bookmark) => res.json(bookmark))
-        .catch((err) =>
-          res.json({ err, bookmark: "Unable to save this user bookmark" })
+    if (_id) {
+      User.findById(req.user.id).then((user) => {
+        Bookmark.findById(_id)
+          .then((bookmark) => {
+            // Check bookmark owner
+            if (user._id.toString() === bookmark.user.toString()) {
+              Bookmark.findByIdAndDelete(_id)
+                .then((bookmark) =>
+                  res.json({
+                    success: "Successfully removed from bookmarks",
+                    bookmark,
+                  })
+                )
+                .catch((err) =>
+                  res.status(404).json({
+                    noBookmarkFound: "No bookmark found with this ID",
+                    err,
+                  })
+                );
+            } else {
+              return res.status(401).json({
+                unauthorized: "You are unauthorized to delete this bookmark",
+              });
+            }
+          })
+          .catch((err) =>
+            res
+              .status(404)
+              .json({ noBookmarkFound: "No bookmark found with this ID", err })
+          );
+      });
+    } else {
+      Bookmark.find({ manga_id: manga_id }).then((bookmarks) => {
+        const oldBookmark = bookmarks.filter(
+          (mark) => mark.user.toString() === req.user._id.toString()
         );
-    });
+        if (oldBookmark.length === 0) {
+          new Bookmark({
+            user: req.user.id,
+            manga_id,
+            alias,
+            image_uri,
+            title,
+            time_ms,
+          })
+            .save()
+            .then((bookmark) => res.json(bookmark))
+            .catch((err) =>
+              res.json({ bookmark: "Unable to save this user bookmark", err })
+            );
+        } else {
+          errors.bookmarkExists = "This bookmark already exists";
+          return res.status(400).json(errors);
+        }
+      });
+    }
   }
 );
 

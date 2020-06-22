@@ -51,47 +51,62 @@ router.post(
     if (!isValid) return res.status(400).json(errors);
 
     const { manga_id, alias, image_uri, title, time_ms, _id } = req.body;
-
-    Favorite.findById(_id).then((favorite) => {
-      errors.favoriteExists = "Favorite already exists";
-      if (favorite) {
-        User.findById(req.user.id).then((user) => {
-          // Check favorite owner
-          if (user._id.toString() === favorite.user.toString()) {
-            Favorite.findByIdAndDelete(req.body._id)
-              .then((favorite) =>
-                res.json({
-                  success: "Successfully removed from favorites",
-                  favorite,
-                })
-              )
-              .catch((err) =>
-                res.status(400).json({
-                  err,
-                })
-              );
-          } else {
-            return res.status(401).json({
-              unauthorized: "You are unauthorized to delete this favorite",
-            });
-          }
-        });
-      }
-
-      new Favorite({
-        user: req.user.id,
-        manga_id,
-        alias,
-        image_uri,
-        title,
-        time_ms,
-      })
-        .save()
-        .then((favorite) => res.json(favorite))
-        .catch((err) =>
-          res.json({ err, favorite: "Unable to save this user favorite" })
+    if (_id) {
+      User.findById(req.user.id).then((user) => {
+        Favorite.findById(_id)
+          .then((favorite) => {
+            // Check favorite owner
+            if (user._id.toString() === favorite.user.toString()) {
+              Favorite.findByIdAndDelete(_id)
+                .then((favorite) =>
+                  res.json({
+                    success: "Successfully removed from favorites",
+                    favorite,
+                  })
+                )
+                .catch((err) =>
+                  res.status(404).json({
+                    noFavoriteFound: "No favorite found with this ID",
+                    err,
+                  })
+                );
+            } else {
+              return res.status(401).json({
+                unauthorized: "You are unauthorized to delete this favorite",
+              });
+            }
+          })
+          .catch((err) =>
+            res
+              .status(404)
+              .json({ noFavoriteFound: "No favorite found with this ID", err })
+          );
+      });
+    } else {
+      Favorite.find({ manga_id: manga_id }).then((favorites) => {
+        const oldFavorite = favorites.filter(
+          (fav) => fav.user.toString() === req.user._id.toString()
         );
-    });
+        if (oldFavorite.length === 0) {
+          new Favorite({
+            user: req.user.id,
+            manga_id,
+            alias,
+            image_uri,
+            title,
+            time_ms,
+          })
+            .save()
+            .then((favorite) => res.json(favorite))
+            .catch((err) =>
+              res.json({ favorite: "Unable to save this user favorite", err })
+            );
+        } else {
+          errors.favoriteExists = "This favorite already exists";
+          return res.status(400).json(errors);
+        }
+      });
+    }
   }
 );
 
