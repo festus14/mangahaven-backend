@@ -50,14 +50,36 @@ router.post(
     // Check Validation
     if (!isValid) return res.status(400).json(errors);
 
-    const { alias, image_uri, title, time_ms, manga_id } = req.body;
+    const { manga_id, alias, image_uri, title, time_ms, _id } = req.body;
 
-    Bookmark.findById(manga_id).then((bookmark) => {
-      errors.bookmarkExists = "Bookmark already exists";
-      if (bookmark) return res.status(400).json(errors);
+    Bookmark.findById(_id).then((bookmark) => {
+      if (bookmark) {
+        User.findById(req.user.id).then((user) => {
+          // Check favorite owner
+          if (user._id.toString() === bookmark.user.toString()) {
+            Bookmark.findByIdAndDelete(req.body._id)
+              .then((bookmark) =>
+                res.json({
+                  success: "Successfully removed from bookmarks",
+                  bookmark,
+                })
+              )
+              .catch((err) =>
+                res.status(400).json({
+                  err,
+                })
+              );
+          } else {
+            return res.status(401).json({
+              unauthorized: "You are unauthorized to delete this bookmark",
+            });
+          }
+        });
+      }
 
       new Bookmark({
         user: req.user.id,
+        manga_id,
         alias,
         image_uri,
         title,
@@ -80,12 +102,17 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     User.findById(req.user.id).then((user) => {
-      Bookmark.findById(req.body.manga_id)
+      Bookmark.findById(req.body._id)
         .then((bookmark) => {
           // Check bookmark owner
           if (user._id.toString() === bookmark.user.toString()) {
-            Bookmark.findByIdAndDelete(req.body.manga_id)
-              .then((bookmark) => res.json({ success: true, bookmark }))
+            Bookmark.findByIdAndDelete(req.body._id)
+              .then((bookmark) =>
+                res.json({
+                  success: "Successfully removed from bookmarks",
+                  bookmark,
+                })
+              )
               .catch((err) =>
                 res.status(404).json({
                   noBookmarkFound: "No bookmark found with this ID",

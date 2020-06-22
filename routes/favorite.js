@@ -50,14 +50,37 @@ router.post(
     // Check Validation
     if (!isValid) return res.status(400).json(errors);
 
-    const { alias, image_uri, title, time_ms, manga_id } = req.body;
+    const { manga_id, alias, image_uri, title, time_ms, _id } = req.body;
 
-    Favorite.findById(manga_id).then((favorite) => {
+    Favorite.findById(_id).then((favorite) => {
       errors.favoriteExists = "Favorite already exists";
-      if (favorite) return res.status(400).json(errors);
+      if (favorite) {
+        User.findById(req.user.id).then((user) => {
+          // Check favorite owner
+          if (user._id.toString() === favorite.user.toString()) {
+            Favorite.findByIdAndDelete(req.body._id)
+              .then((favorite) =>
+                res.json({
+                  success: "Successfully removed from favorites",
+                  favorite,
+                })
+              )
+              .catch((err) =>
+                res.status(400).json({
+                  err,
+                })
+              );
+          } else {
+            return res.status(401).json({
+              unauthorized: "You are unauthorized to delete this favorite",
+            });
+          }
+        });
+      }
 
       new Favorite({
         user: req.user.id,
+        manga_id,
         alias,
         image_uri,
         title,
@@ -80,12 +103,17 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     User.findById(req.user.id).then((user) => {
-      Favorite.findById(req.body.manga_id)
+      Favorite.findById(req.body._id)
         .then((favorite) => {
           // Check favorite owner
           if (user._id.toString() === favorite.user.toString()) {
-            Favorite.findByIdAndDelete(req.body.manga_id)
-              .then((favorite) => res.json({ success: true, favorite }))
+            Favorite.findByIdAndDelete(req.body._id)
+              .then((favorite) =>
+                res.json({
+                  success: "Successfully removed from favorites",
+                  favorite,
+                })
+              )
               .catch((err) =>
                 res.status(404).json({
                   noFavoriteFound: "No favorite found with this ID",
